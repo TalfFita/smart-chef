@@ -141,3 +141,35 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+
+# ─── Smart Chef — monorepo ───────────────────────────────────────────────────
+
+# Dependencias
+backend/node_modules/
+frontend/node_modules/
+
+# Builds compilados
+backend/dist/
+frontend/dist/
+
+
+# Variables de entorno (nunca subir secretos)
+.env
+.env.local
+.env.production
+backend/.env
+frontend/.env
+# Sí subir el ejemplo
+!.env.example
+!backend/.env.example
+!frontend/.env.example
+
+# Cache de Vite
+frontend/.vite/
+
+# VS Code
+.vscode/
+
+# Docker overrides locales
+docker-compose.override.yml

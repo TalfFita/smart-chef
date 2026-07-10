@@ -1,0 +1,167 @@
+// schema.prisma - Smart Chef
+// Modelo de datos definitivo con las 7 entidades y enums correctos
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUMS ───────────────────────────────────────────────────────────────────
+
+enum CategoriaMenu {
+  ENTRANTE
+  PRINCIPAL
+  POSTRE
+  APERITIVO
+}
+
+enum EstiloCulinario {
+  MEDITERRANEO
+  LATINO
+  ASIATICO
+  NORDICO
+  FUSION
+}
+
+// Solo dos modos. El modo técnico (horno, plancha...) va en tags[] de la receta
+enum ModoPreparacion {
+  TRADICIONAL
+  PROFESIONAL
+}
+
+enum Dificultad {
+  FACIL
+  MEDIA
+  DIFICIL
+}
+
+enum TipoBloque {
+  PREPARAR
+  ELABORAR
+  COCINAR
+  ESPERAR
+  FIN
+}
+
+// ─── MODELOS ─────────────────────────────────────────────────────────────────
+
+model Usuario {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  password_hash String
+  nombre        String
+  created_at    DateTime @default(now())
+
+  // Relaciones
+  recetas              Receta[]
+  favoritos            Favorito[]
+  anotaciones_privadas AnotacionPrivada[]
+  historial            HistorialCocina[]
+
+  @@map("usuarios")
+}
+
+model Receta {
+  id                   Int             @id @default(autoincrement())
+  titulo               String
+  categoria_menu       CategoriaMenu
+  estilo_culinario     EstiloCulinario
+  modo_preparacion     ModoPreparacion
+  dificultad           Dificultad
+  tiempo_preparacion   Int             // minutos totales (formato display lo gestiona el backend)
+  ingredientes_texto   String          // texto libre: "200g azúcar moreno, 1 calabacín…"
+  tags                 String[]        // único campo que alimenta el scoring del motor de recomendación
+  autor_id           Int?            // null = receta del catálogo del sistema
+  created_at         DateTime        @default(now())
+  eliminado_en       DateTime?       // null = activa; borrado lógico (soft delete)
+
+  // Relaciones
+  autor                Usuario?           @relation(fields: [autor_id], references: [id])
+  bloques              BloqueReceta[]
+  favoritos            Favorito[]
+  anotaciones_estilo   AnotacionEstilo[]
+  anotaciones_privadas AnotacionPrivada[]
+  historial            HistorialCocina[]
+
+  @@map("recetas")
+}
+
+model BloqueReceta {
+  id              Int        @id @default(autoincrement())
+  receta_id       Int
+  tipo_bloque     TipoBloque
+  orden           Int        // posición dentro de la receta (1, 2, 3...)
+  contenido       String     // texto del bloque redactado en español
+  tiempo_estimado Int?       // minutos estimados para este bloque (null si no aplica)
+
+  // Relaciones
+  receta             Receta            @relation(fields: [receta_id], references: [id], onDelete: Cascade)
+  anotaciones_estilo AnotacionEstilo[]
+
+  @@map("bloques_receta")
+}
+
+model AnotacionEstilo {
+  id            Int      @id @default(autoincrement())
+  receta_id     Int
+  bloque_id     Int?     // null = anotación sobre la receta en general
+  palabra_clave String   // la palabra del texto sobre la que se anota
+  explicacion   String   // conocimiento tácito explicado
+  created_at    DateTime @default(now())
+
+  // Relaciones - PÚBLICA: cualquier usuario puede verla
+  // Cascade en ambas: si se borra la receta O el bloque, se borra la anotación
+  receta Receta        @relation(fields: [receta_id], references: [id], onDelete: Cascade)
+  bloque BloqueReceta? @relation(fields: [bloque_id], references: [id], onDelete: Cascade)
+
+  @@map("anotaciones_estilo")
+}
+
+model AnotacionPrivada {
+  id               Int      @id @default(autoincrement())
+  usuario_id       Int
+  receta_id        Int
+  contenido        String
+  color            String   // color hex, ej: "#FFD700"
+  posicion_bloque  Int?     // orden del bloque al que está anclada (null = sin anclar)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  // Relaciones - PRIVADA: solo la ve su propietario
+  usuario Usuario @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
+  receta  Receta  @relation(fields: [receta_id], references: [id], onDelete: Cascade)
+
+  @@map("anotaciones_privadas")
+}
+
+model Favorito {
+  id         Int      @id @default(autoincrement())
+  usuario_id Int
+  receta_id  Int
+  created_at DateTime @default(now())
+
+  // Relaciones
+  usuario Usuario @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
+  receta  Receta  @relation(fields: [receta_id], references: [id], onDelete: Cascade)
+
+  // Un usuario no puede marcar la misma receta como favorita dos veces
+  @@unique([usuario_id, receta_id])
+  @@map("favoritos")
+}
+
+model HistorialCocina {
+  id          Int      @id @default(autoincrement())
+  usuario_id  Int
+  receta_id   Int
+  cocinado_el DateTime @default(now())
+
+  // Sin unique(usuario_id, receta_id): la misma receta puede cocinarse en días distintos
+  usuario Usuario @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
+  receta  Receta  @relation(fields: [receta_id], references: [id], onDelete: Cascade)
+
+  @@map("historial_cocina")
+}

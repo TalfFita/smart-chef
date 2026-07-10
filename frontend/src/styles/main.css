@@ -1,0 +1,321 @@
+:root {
+  /* ── Colores principales ── */
+  --color-primario: #C96A3A;
+  --color-primario-suave: #F5EDE8;
+  --color-primario-hover: #B05A2E;
+  --color-secundario: #FAFAF8;
+  --color-superficie: #FFFFFF;
+  --color-crema: #FAF7F4;
+  --color-borde: #EDE8E3;
+  --color-borde-input: #E0E0E0;
+  --color-texto-principal: #1A1A1A;
+  --color-texto-secundario: #6B6B6B;
+  --color-texto-terciario: #9E9E9E;
+  --color-error: #E53935;
+  --color-error-fondo: #FFEBEE;
+  --color-exito: #43A047;
+  --color-exito-suave: #E8F5E9;
+
+  /* ── Tarjetas ── */
+  --tarjeta-fondo: #FFFFFF;
+  --tarjeta-radio: 16px;
+  --tarjeta-sombra: 0 2px 12px rgba(0, 0, 0, 0.08);
+  --tarjeta-sombra-hover: 0 4px 20px rgba(0, 0, 0, 0.12);
+  --tarjeta-padding: 16px;
+
+  /* ── Tarjeta secundaria (post-its, chips) ── */
+  --tarjeta-secundaria-radio: 12px;
+  --tarjeta-secundaria-sombra: 0 1px 6px rgba(0, 0, 0, 0.06);
+
+  /* ── Superficie alternativa (contenedores de tags, secciones internas) ── */
+  /* Beige cálido entre --color-secundario (#FAFAF8) y --color-primario-suave (#F5EDE8).
+     Crea jerarquía: página → contenedor-tags → chips, sin introducir un nuevo tono. */
+  --color-superficie-alt: #F0E7DF;
+
+  /* ── Colores post-its ── */
+  --postit-amarillo: #FFF9C4;
+  --postit-verde: #C8E6C9;
+  --postit-azul: #BBDEFB;
+  --postit-naranja: #FFE0B2;
+
+  /* ── Heatmap ── */
+  --heatmap-vacio: #EEEEEE;
+  --heatmap-nivel1: #F5C4A8;
+  --heatmap-nivel2: #E8956D;
+  --heatmap-nivel3: #C96A3A;
+
+  /* ── Dificultad ── */
+  --dificultad-facil-fondo: #E8F5E9;
+  --dificultad-facil-texto: #2E7D32;
+  --dificultad-media-fondo: #FFF3E0;
+  --dificultad-media-texto: #E65100;
+  --dificultad-dificil-fondo: #FFEBEE;
+  --dificultad-dificil-texto: #C62828;
+
+  /* ── Tipografía ── */
+  --fuente-principal: 'Inter', system-ui, sans-serif;
+  --texto-xs: 12px;
+  --texto-sm: 14px;
+  --texto-base: 16px;
+  --texto-md: 18px;
+  --texto-lg: 21px;
+  --texto-xl: 25px;
+  --texto-2xl: 30px;
+  --texto-metrica: 22px;
+
+  /* ── Espaciado ── */
+  --espacio-xs: 5px;
+  --espacio-sm: 10px;
+  --espacio-md: 20px;
+  --espacio-lg: 30px;
+  --espacio-xl: 40px;
+
+  /* ── Layout ── */
+  --footer-altura: 64px;
+  --header-altura: 56px;
+  --contenido-max-ancho: 480px;
+  --boton-radio: 12px;
+  --boton-altura: 48px;
+  --vista-padding-bottom: 1rem;
+
+  /* ── Input ── */
+  --input-radio: 12px;
+  --input-altura: 44px;
+  --input-padding: 0 var(--espacio-md);
+  --input-border: 1.5px solid var(--color-primario);
+  --input-border-focus: 1.5px solid var(--color-primario-hover);
+  --input-border-error: 1.5px solid var(--color-error);
+
+  /* ── Radios ── */
+  --chip-radio: 999px;
+  --badge-radio: 6px;
+}
+
+/* ── Clases utilitarias globales ── */
+.tarjeta {
+  background: var(--tarjeta-fondo);
+  border-radius: var(--tarjeta-radio);
+  box-shadow: var(--tarjeta-sombra);
+  padding: var(--tarjeta-padding);
+}
+
+.tarjeta-secundaria {
+  background: var(--tarjeta-fondo);
+  border-radius: var(--tarjeta-secundaria-radio);
+  box-shadow: var(--tarjeta-secundaria-sombra);
+  padding: var(--tarjeta-padding);
+}
+
+.boton-primario {
+  background: var(--color-primario);
+  color: white;
+  border: none;
+  border-radius: var(--boton-radio);
+  height: var(--boton-altura);
+  width: 100%;
+  font-size: var(--texto-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.boton-primario:hover {
+  background: var(--color-primario-hover);
+}
+
+.chip-tag {
+  background: var(--color-primario-suave);
+  color: var(--color-primario);
+  border: 1px solid currentColor;
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-size: var(--texto-xs);
+  font-weight: 500;
+}
+
+.texto-secundario {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+.vista-contenido {
+  padding: var(--espacio-md);
+  padding-bottom: calc(var(--footer-altura) + var(--espacio-md));
+  max-width: var(--contenido-max-ancho);
+  margin: 0 auto;
+}
+
+/* ── Chips reutilizables ─────────────────────────────────────────────────── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-family: var(--fuente-principal);
+  font-size: var(--texto-xs);
+  font-weight: 500;
+}
+/* ── Geometría compartida: chips de metadatos de receta ─────────────────── */
+.chip-tiempo,
+.chip-estilo,
+.chip-categoria,
+.badge-dificultad {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: var(--texto-sm);
+  font-weight: 500;
+}
+.chip-tiempo {
+  background: var(--color-borde-input);
+  color: var(--color-texto-secundario);
+}
+.chip--modo {
+  background: #ECEFF1;
+  color: #546E7A;
+  border: 1px solid currentColor;
+}
+.bloque-tags-wrapper {
+  margin-top: var(--espacio-md);
+}
+.tags-titulo {
+  text-align: center;
+  margin: var(--espacio-md) 0 var(--espacio-xs) 0;
+}
+.bloque-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 6px;
+  border: 1px solid;
+  border-color: var(--color-primario);
+  background: var(--color-primario-suave);
+  border-radius: var(--tarjeta-secundaria-radio);
+  padding: 10px 12px;
+  box-shadow: var(--tarjeta-secundaria-sombra);
+}
+.chip--primario {
+  background: rgba(200, 98, 34, 0.12);
+  color: var(--color-primario);
+}
+.vista-capa0 {
+  padding-bottom: var(--vista-padding-bottom);
+}
+
+/* ── Input base ─────────────────────────────────────────────────────────────── */
+.input-base {
+  height: var(--input-altura);
+  border: var(--input-border);
+  border-radius: var(--input-radio);
+  padding: var(--input-padding);
+  font-size: var(--texto-base);
+  color: var(--color-texto-principal);
+  background: var(--color-primario-suave);
+  width: 100%;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+.input-base:focus {
+  border: var(--input-border-focus);
+}
+.input-base.input--error {
+  border: var(--input-border-error);
+}
+
+/* Genérica: contenedores que no son .input-base (filas de chips, wrappers de
+   bloques) también pueden marcar error con la misma clase */
+.input--error {
+  border: var(--input-border-error);
+}
+
+/* ── Error de campo (debajo de un input) ─────────────────────────────────── */
+.campo-error {
+  font-size: var(--texto-xs);
+  color: var(--color-error);
+  margin-top: 0.25rem;
+}
+
+/* ── Error bloque (caja de error servidor) ───────────────────────────────── */
+.error-bloque {
+  font-size: var(--texto-sm);
+  color: var(--color-error);
+  background: var(--color-error-fondo);
+  border-radius: var(--badge-radio);
+  padding: 10px 12px;
+  text-align: center;
+}
+
+/* ── Separador visual ─────────────────────────────────────────────────────── */
+.divider {
+  display: flex;
+  width: 100%;
+  height: 1px;
+  background: var(--color-borde);
+  margin: var(--espacio-sm) 0;
+}
+
+/* ── Label de sección (CATEGORÍA *, TAGS *, etc.) ────────────────────────── */
+.seccion-label {
+  font-size: var(--texto-sm);
+  font-weight: 700;
+  color: var(--color-texto-secundario);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+/* ── Chip de estilo culinario ────────────────────────────────────────────── */
+.chip-estilo--mediterraneo { background: #DCEEFB; color: #2196F3; }
+.chip-estilo--asiatico     { background: #FCE4EC; color: #E91E63; }
+.chip-estilo--latino       { background: #E8F5E9; color: #4CAF50; }
+.chip-estilo--nordico      { background: #E8EAF6; color: #3F51B5; }
+.chip-estilo--fusion       { background: #FFF8E1; color: #FF8F00; }
+
+/* ── Chip de categoría de menú ──────────────────────────────────────────── */
+.chip-categoria--aperitivo { background: #E0F2F1; color: #00897B; }
+.chip-categoria--entrante  { background: #F1F8E9; color: #7CB342; }
+.chip-categoria--principal { background: #FBE9E7; color: #D84315; }
+.chip-categoria--postre    { background: #F3E5F5; color: #7B1FA2; }
+
+/* ── Badge de dificultad ─────────────────────────────────────────────────── */
+.badge-dificultad {
+  white-space: nowrap;
+}
+.badge--facil   { background: var(--dificultad-facil-fondo);   color: var(--dificultad-facil-texto); }
+.badge--media   { background: var(--dificultad-media-fondo);   color: var(--dificultad-media-texto); }
+.badge--dificil { background: var(--dificultad-dificil-fondo); color: var(--dificultad-dificil-texto); }
+
+/* ── Badge "Recomendada" ─────────────────────────────────────────────────── */
+.badge-recomendada {
+  font-size: var(--texto-xs);
+  font-weight: 700;
+  color: var(--color-primario);
+  background: var(--color-primario-suave);
+  border-radius: var(--badge-radio);
+  padding: 2px 8px;
+}
+
+/* ── Botón principal (alias unificado de .boton-primario) ────────────────── */
+.btn-principal {
+  height: var(--boton-altura);
+  background: var(--color-primario);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--boton-radio);
+  font-size: var(--texto-base);
+  font-weight: 600;
+  width: 100%;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn-principal:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.btn-principal:hover:not(:disabled) {
+  background: var(--color-primario-hover);
+}
