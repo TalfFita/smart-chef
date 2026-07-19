@@ -4,6 +4,10 @@
  * Único punto de acceso a la tabla "historial_cocina".
  * Sin unique constraint: el mismo usuario puede registrar la misma
  * receta múltiples veces en días distintos.
+ *
+ * Métodos:
+ *   create         -- registra una nueva entrada (cocinado_el = now)
+ *   findByUsuario  -- devuelve el historial de un usuario con datos de receta
  */
 
 import prisma from '../lib/prisma';

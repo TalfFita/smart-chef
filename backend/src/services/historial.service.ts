@@ -1,13 +1,25 @@
 /**
  * historial.service.ts -- Lógica de negocio del historial de cocina
  *
+ * Responsabilidades:
+ *   - Registrar que un usuario ha cocinado una receta
+ *   - Devolver el historial completo de un usuario
+ *
  * No accede a Prisma directamente: usa historialRepository.
  * No gestiona HTTP: eso lo hace historial.controller.ts.
  */
 
 import historialRepository from '../repositories/historial.repository';
 import recetaRepository from '../repositories/receta.repository';
-import { RecetaNoEncontradaError } from '../errors/RecetaNoEncontradaError';
+
+// Errores de dominio
+
+export class RecetaNoExisteParaHistorialError extends Error {
+  constructor() {
+    super('La receta no existe');
+    this.name = 'RecetaNoExisteParaHistorialError';
+  }
+}
 
 // Servicio
 
@@ -19,7 +31,7 @@ const historialService = {
    */
   async marcarCocinada(usuario_id: number, receta_id: number) {
     const receta = await recetaRepository.findById(receta_id);
-    if (!receta) throw new RecetaNoEncontradaError('La receta no existe');
+    if (!receta) throw new RecetaNoExisteParaHistorialError();
 
     return historialRepository.create(usuario_id, receta_id);
   },

@@ -8,6 +8,12 @@
  *
  * Una anotación puede estar vinculada a un bloque concreto (bloque_id)
  * o a la receta en general (bloque_id null).
+ *
+ * Métodos:
+ *   create       -- crear anotación de estilo sobre palabra clave (RF10)
+ *   findByReceta -- todas las anotaciones de una receta (RF03, RF10)
+ *   findByBloque -- anotaciones vinculadas a un bloque concreto (RF10)
+ *   delete       -- eliminar anotación (RF10)
  */
 
 import prisma from '../lib/prisma';
@@ -53,6 +59,16 @@ const anotacionEstiloRepository = {
         { bloque_id: 'asc' }, // null primero en PostgreSQL con nulls first
         { created_at: 'asc' },
       ],
+    });
+  },
+
+  /**
+   * Devuelve las anotaciones de estilo vinculadas a un bloque concreto.
+   */
+  async findByBloque(bloque_id: number) {
+    return prisma.anotacionEstilo.findMany({
+      where: { bloque_id },
+      orderBy: { created_at: 'asc' },
     });
   },
 

@@ -368,7 +368,6 @@ import { useFavoritoStore }  from '@/stores/favorito.store'
 import { useHistorialStore } from '@/stores/historial.store'
 import { procesarContenidoBloque } from '@/utils/procesarBloques'
 import { mostrarToast } from '@/composables/useToast'
-import { useAsyncAction } from '@/composables/useAsyncAction'
 import SliderConfirmar   from '@/components/SliderConfirmar.vue'
 import BottomSheet       from '@/components/BottomSheet.vue'
 import RecetaContenido   from '@/components/RecetaContenido.vue'
@@ -382,7 +381,6 @@ const recetaStore    = useRecetaStore()
 const anotacionStore = useAnotacionStore()
 const favoritoStore  = useFavoritoStore()
 const historialStore = useHistorialStore()
-const { ejecutar } = useAsyncAction()
 
 // Constantes tipadas (excepciones permitidas a "sin colores hardcodeados")
 const COLORES_NOTA = [
@@ -537,11 +535,13 @@ async function ejecutarToggleFavorito(): Promise<void> {
   // Disparar animación de bounce inmediatamente (el store ya hace update optimista)
   animandoFavorito.value = true
   setTimeout(() => { animandoFavorito.value = false }, 450)
-  // El store ya revierte el estado optimista si falla; aquí solo avisamos.
-  await ejecutar(
-    () => esFavorito.value ? favoritoStore.eliminar(recetaId.value) : favoritoStore.añadir(recetaId.value),
-    { mensajeError: 'Error al actualizar favorito. Inténtalo de nuevo.' }
-  )
+  try {
+    if (esFavorito.value) await favoritoStore.eliminar(recetaId.value)
+    else await favoritoStore.añadir(recetaId.value)
+  } catch {
+    // El store ya revirtió el estado optimista; mostrar feedback de error
+    mostrarToast('Error al actualizar favorito. Inténtalo de nuevo.', 'error')
+  }
 }
 
 function ejecutarModificar(): void {
@@ -551,12 +551,14 @@ function ejecutarModificar(): void {
 async function ejecutarBorrar(): Promise<void> {
   mostrandoConfirmBorrado.value = false
   const titulo = receta.value?.titulo ?? ''
-  await ejecutar(() => recetaStore.eliminar(recetaId.value), {
-    mensajeExito: `Receta "${titulo}" borrada correctamente`,
-    onExito: () => router.push('/recetario'),
-    mensajeError: 'Error al borrar la receta. Inténtalo de nuevo.',
-    onError: (error) => console.error('[RecetaDetailView] Error al borrar:', error),
-  })
+  try {
+    await recetaStore.eliminar(recetaId.value)
+    mostrarToast(`Receta "${titulo}" borrada correctamente`, 'success')
+    router.push('/recetario')
+  } catch (error) {
+    console.error('[RecetaDetailView] Error al borrar:', error)
+    mostrarToast('Error al borrar la receta. Inténtalo de nuevo.', 'error')
+  }
 }
 
 // Doble-tap en bloque - capa táctil (@touchend, móvil)
@@ -601,10 +603,12 @@ function onBloqueDblClick(bloqueOrden: number): void {
 
 // Slider "ya lo he cocinado"
 async function onSliderConfirmar(): Promise<void> {
-  await ejecutar(() => historialStore.marcarCocinada(recetaId.value), {
-    mensajeExito: '¡Receta marcada como cocinada!',
-    mensajeError: 'No se pudo registrar como cocinada. Inténtalo de nuevo.',
-  })
+  try {
+    await historialStore.marcarCocinada(recetaId.value)
+    mostrarToast('¡Receta marcada como cocinada!', 'success')
+  } catch {
+    mostrarToast('No se pudo registrar como cocinada. Inténtalo de nuevo.', 'error')
+  }
 }
 
 // Panel de nota (creación / edición)
@@ -621,45 +625,35 @@ async function aceptarNota(): Promise<void> {
 
   if (anotacionEditandoId.value !== null) {
     // Modo edición: actualizar y refrescar desde BD (el PATCH devuelve { count }, no el objeto)
-    const id = anotacionEditandoId.value
-    await ejecutar(
-      async () => {
-        await anotacionStore.actualizarPrivada(id, {
-          contenido: textoNota.value.trim(),
-          color: colorNota.value,
-        })
-        await anotacionStore.cargarPrivadas(recetaId.value)
-      },
-      {
-        mensajeExito: 'Nota actualizada correctamente',
-        // Si falla, no se limpia el estado: el panel sigue abierto con el
-        // texto tal cual lo dejó el usuario, para que pueda reintentar sin perderlo.
-        onExito: () => {
-          anotacionEditandoId.value = null
-          panelNotaAbierto.value = false
-          textoNota.value = ''
-          colorNota.value = '#FFF9C4'
-        },
-        mensajeError: 'No se pudo actualizar la nota. Inténtalo de nuevo.',
-      }
-    )
+    try {
+      await anotacionStore.actualizarPrivada(anotacionEditandoId.value, {
+        contenido: textoNota.value.trim(),
+        color: colorNota.value,
+      })
+      await anotacionStore.cargarPrivadas(recetaId.value)
+      anotacionEditandoId.value = null
+      panelNotaAbierto.value = false
+      textoNota.value = ''
+      colorNota.value = '#FFF9C4'
+      mostrarToast('Nota actualizada correctamente', 'success')
+    } catch {
+      // No se limpia el estado: el panel sigue abierto con el texto tal
+      // cual lo dejó el usuario, para que pueda reintentar sin perderlo.
+      mostrarToast('No se pudo actualizar la nota. Inténtalo de nuevo.', 'error')
+    }
   } else if (bloquePreseleccionado.value !== null) {
     // Modo doble-tap: bloque ya conocido, crear directamente sin drag
-    const posicionBloque = bloquePreseleccionado.value
-    await ejecutar(
-      async () => {
-        await anotacionStore.crearPrivada(recetaId.value, {
-          contenido:       textoNota.value.trim(),
-          color:           colorNota.value,
-          posicion_bloque: posicionBloque,
-        })
-        await anotacionStore.cargarPrivadas(recetaId.value)
-      },
-      {
-        mensajeExito: 'Nota añadida correctamente',
-        mensajeError: 'No se pudo guardar la nota. Inténtalo de nuevo.',
-      }
-    )
+    try {
+      await anotacionStore.crearPrivada(recetaId.value, {
+        contenido:       textoNota.value.trim(),
+        color:           colorNota.value,
+        posicion_bloque: bloquePreseleccionado.value,
+      })
+      await anotacionStore.cargarPrivadas(recetaId.value)
+      mostrarToast('Nota añadida correctamente', 'success')
+    } catch {
+      mostrarToast('No se pudo guardar la nota. Inténtalo de nuevo.', 'error')
+    }
     cerrarPanel()
   } else {
     // Fallback: modo colocación por arrastre (bloquePreseleccionado no fue asignado)
@@ -1146,7 +1140,7 @@ onUnmounted(() => {
   color: var(--color-texto-terciario);
 }
 
-/* El contenedor usa el fondo de página para que se vean los gaps */
+/* [CAMBIO 1] El contenedor usa el fondo de página para que se vean los gaps */
 .bloques-lista {
   background: var(--color-secundario);
   padding: var(--espacio-md);
@@ -1154,7 +1148,7 @@ onUnmounted(() => {
   flex-direction: column;
 }
 
-/* Bloques como tarjetas con borde, radio y margen entre ellos */
+/* [CAMBIO 1] Bloques como tarjetas con borde, radio y margen entre ellos */
 .bloque {
   padding: var(--espacio-md);
   background: var(--color-superficie);
@@ -1166,7 +1160,7 @@ onUnmounted(() => {
   box-shadow: var(--tarjeta-secundaria-sombra);
 }
 
-/* Bloque activo bajo el cursor mientras se arrastra */
+/* [CAMBIO 2] Bloque activo bajo el cursor mientras se arrastra */
 .bloque--drop-activo {
   border-color: var(--color-primario);
   background: var(--color-primario-suave);
@@ -1202,6 +1196,10 @@ onUnmounted(() => {
   font-weight: 600;
 }
 
+.flex-spacer {
+  flex: 1;
+}
+
 .bloque-contenido {
   margin-top: 12px;
   font-size: var(--texto-base);
@@ -1223,7 +1221,7 @@ onUnmounted(() => {
   opacity: 0.7;
 }
 
-/* -- Post-its: solo círculos que abren modal ------------------- */
+/* -- [CAMBIO 3] Post-its: solo círculos que abren modal ------------------- */
 .bloque-notas {
   display: flex;
   flex-wrap: wrap;
@@ -1240,6 +1238,14 @@ onUnmounted(() => {
   margin: 2px;
   transition: transform 150ms ease;
   /* El color y el borde se aplican vía inline style */
+
+  /* Sin esto, un long-press en iOS Safari real (no en el emulador de Chrome)
+     dispara la selección de texto / callout nativo del bloque contenedor
+     antes de que salte el timer de LONG_PRESS_MS y arranque el drag. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .postit-circulo:hover {
@@ -1526,7 +1532,7 @@ onUnmounted(() => {
   line-height: 1.5;
 }
 
-/* -- Modal de detalle del post-it ------------------------------- */
+/* -- [CAMBIO 3] Modal de detalle del post-it ------------------------------- */
 .modal-overlay {
   position: fixed;
   inset: 0;

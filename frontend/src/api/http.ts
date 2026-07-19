@@ -1,9 +1,14 @@
 import axios from 'axios'
 import router from '@/router'
 
-// Instancia de Axios apuntando al backend
+// Instancia de Axios apuntando al backend.
+// VITE_API_URL se define en .env.local (no versionado, ver .env.example).
+// Si no está definida, se usa una ruta relativa '/api': el proxy de Vite
+// (vite.config.ts) la redirige a localhost:3000, cómodo para desarrollo
+// puramente local. En modo LAN, VITE_API_URL debe apuntar a la IP de tu
+// máquina en la red, ej: http://192.168.1.50:3000/api
 const http = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  baseURL: import.meta.env.VITE_API_URL || '/api',
 })
 
 // Interceptor de REQUEST -- añade el token JWT si existe

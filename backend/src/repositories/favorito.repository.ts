@@ -3,9 +3,14 @@
  *
  * Único punto de acceso a la tabla "favoritos".
  * La constraint @@unique([usuario_id, receta_id]) en el schema
- * garantiza que no se dupliquen a nivel de base de datos. El servicio
- * evita el duplicado con una comprobación previa (existsByUsuarioYReceta)
- * antes de llamar a add -- no captura el error P2002 de Prisma.
+ * garantiza que no se dupliquen. Si se intenta añadir dos veces,
+ * Prisma lanza un error P2002 que el servicio debe capturar.
+ *
+ * Métodos:
+ *   add                      -- marcar receta como favorita (RF06)
+ *   remove                   -- desmarcar receta como favorita (RF06)
+ *   findByUsuario            -- listar favoritos del usuario (RF06)
+ *   existsByUsuarioYReceta   -- comprobar si ya es favorita (RF06)
  */
 
 import prisma from '../lib/prisma';
@@ -16,8 +21,8 @@ const favoritoRepository = {
 
   /**
    * Marca una receta como favorita para un usuario.
-   * El servicio comprueba antes con existsByUsuarioYReceta que la
-   * combinación no existe -- este método asume que ya se verificó.
+   * Si la combinación ya existe, Prisma lanzará P2002 (unique constraint).
+   * El servicio es responsable de manejar ese error.
    */
   async add(usuario_id: number, receta_id: number) {
     return prisma.favorito.create({

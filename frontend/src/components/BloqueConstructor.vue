@@ -81,6 +81,10 @@ const infoTipo = computed(() => TIPOS_INFO[props.bloque.tipo] ?? FALLBACK)
   transition: opacity 0.15s, box-shadow 0.15s;
   touch-action: none;
   user-select: none;
+  -webkit-user-select: none;
+  /* Sin esto, iOS Safari abre su selección/callout nativos al mantener
+     pulsado, en vez de dejar que arranque el drag (ver useDragBloques). */
+  -webkit-touch-callout: none;
 }
 
 .bloque-card--drag {

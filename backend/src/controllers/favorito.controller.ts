@@ -11,8 +11,8 @@ import { Request, Response } from 'express';
 import favoritoService, {
   YaEsFavoritoError,
   NoEsFavoritoError,
+  RecetaNoExisteError,
 } from '../services/favorito.service';
-import { RecetaNoEncontradaError } from '../errors/RecetaNoEncontradaError';
 
 const favoritoController = {
 
@@ -51,7 +51,7 @@ const favoritoController = {
         res.status(409).json({ error: error.message });
         return;
       }
-      if (error instanceof RecetaNoEncontradaError) {
+      if (error instanceof RecetaNoExisteError) {
         res.status(404).json({ error: error.message });
         return;
       }

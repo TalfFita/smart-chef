@@ -6,7 +6,7 @@
  * usuario decodificado a req.usuario para que los controllers los usen.
  *
  * Uso en rutas:
- *   router.post('/recetas', authMiddleware, recetaController.crear);
+ *   router.post('/recetas', authMiddleware, recetaController.create);
  *
  * Cubre RF02.
  */

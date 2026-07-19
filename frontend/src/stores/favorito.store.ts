@@ -2,18 +2,25 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import http from '@/api/http'
 import type { Receta } from '@/types'
-import { useAsyncState } from '@/composables/useAsyncState'
 
 export const useFavoritoStore = defineStore('favorito', () => {
   // Estado
   const favoritos = ref<Receta[]>([])
-  const { cargando, error, runAsync } = useAsyncState()
+  const cargando = ref(false)
+  const error = ref<string | null>(null)
 
   async function cargarFavoritos(): Promise<void> {
-    favoritos.value = await runAsync(async () => {
+    cargando.value = true
+    error.value = null
+    try {
       const { data } = await http.get<Receta[]>('/favoritos')
-      return data
-    }, 'Error al cargar favoritos')
+      favoritos.value = data
+    } catch (e) {
+      error.value = 'Error al cargar favoritos'
+      throw e
+    } finally {
+      cargando.value = false
+    }
   }
 
   async function añadir(recetaId: number): Promise<void> {

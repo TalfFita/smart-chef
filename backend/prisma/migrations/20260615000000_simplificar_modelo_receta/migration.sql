@@ -1,6 +1,6 @@
 -- Migration: simplificar_modelo_receta
 -- Drops: descripcion (String), ingredientes (String[])
--- Adds:  ingredientes_texto (String) - texto libre, puramente informativo
+-- Adds:  ingredientes_texto (String) — texto libre, puramente informativo
 
 ALTER TABLE "recetas" DROP COLUMN "descripcion";
 ALTER TABLE "recetas" DROP COLUMN "ingredientes";

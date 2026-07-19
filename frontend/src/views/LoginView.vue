@@ -76,7 +76,6 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
 import { mostrarToast } from '@/composables/useToast'
-import { esEmailValido } from '@/utils/validadores'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -92,6 +91,9 @@ const errores = reactive<{ email: string; password: string }>({
   password: '',
 })
 
+// Regex básico de email
+const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 function validar(): boolean {
   errores.email = ''
   errores.password = ''
@@ -100,7 +102,7 @@ function validar(): boolean {
   if (!email.value.trim()) {
     errores.email = 'El email es obligatorio'
     valido = false
-  } else if (!esEmailValido(email.value.trim())) {
+  } else if (!regexEmail.test(email.value.trim())) {
     errores.email = 'Introduce un email válido'
     valido = false
   }

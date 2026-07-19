@@ -1,13 +1,17 @@
 /**
  * favorito.service.ts -- Lógica de negocio de favoritos
  *
+ * Responsabilidades:
+ *   - Añadir receta a favoritos (RF06)
+ *   - Quitar receta de favoritos (RF06)
+ *   - Listar favoritos del usuario (RF06)
+ *
  * Gestiona el caso de duplicado: si el usuario intenta añadir una receta
  * que ya tiene como favorita, devuelve un error de dominio claro.
  */
 
 import favoritoRepository from '../repositories/favorito.repository';
 import recetaRepository from '../repositories/receta.repository';
-import { RecetaNoEncontradaError } from '../errors/RecetaNoEncontradaError';
 
 // Errores de dominio
 
@@ -25,6 +29,13 @@ export class NoEsFavoritoError extends Error {
   }
 }
 
+export class RecetaNoExisteError extends Error {
+  constructor() {
+    super('La receta no existe');
+    this.name = 'RecetaNoExisteError';
+  }
+}
+
 // Servicio
 
 const favoritoService = {
@@ -36,7 +47,7 @@ const favoritoService = {
    */
   async añadir(usuario_id: number, receta_id: number) {
     const receta = await recetaRepository.findById(receta_id);
-    if (!receta) throw new RecetaNoEncontradaError('La receta no existe');
+    if (!receta) throw new RecetaNoExisteError();
 
     const yaExiste = await favoritoRepository.existsByUsuarioYReceta(usuario_id, receta_id);
     if (yaExiste) throw new YaEsFavoritoError();

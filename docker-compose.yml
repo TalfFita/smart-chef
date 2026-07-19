@@ -33,9 +33,10 @@ services:
     environment:
       DATABASE_URL: postgresql://smart_chef_user:smart_chef_pass@db:5432/smart_chef_db?schema=public
       JWT_SECRET: ${JWT_SECRET:-cambia_este_secreto_en_produccion}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
       PORT: 3000
       NODE_ENV: ${NODE_ENV:-development}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
     ports:
       - "3000:3000"
     volumes:

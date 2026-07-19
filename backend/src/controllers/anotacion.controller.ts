@@ -16,8 +16,11 @@
 
 import { Request, Response } from 'express';
 import { z } from 'zod';
-import anotacionService from '../services/anotacion.service';
-import { manejarErrorController } from '../utils/manejarErrorController';
+import anotacionService, {
+  AnotacionNoEncontradaError,
+  NoAutorizadoError,
+  RecetaNoExisteError,
+} from '../services/anotacion.service';
 
 // Esquemas de validación
 
@@ -78,7 +81,9 @@ const anotacionController = {
       );
       res.status(201).json(anotacion);
     } catch (error) {
-      manejarErrorController(error, res, '[anotacion.controller] Error en crearPrivada');
+      if (error instanceof RecetaNoExisteError) { res.status(404).json({ error: error.message }); return; }
+      console.error('[anotacion.controller] Error en crearPrivada:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
 
@@ -91,7 +96,8 @@ const anotacionController = {
       const anotaciones = await anotacionService.listarPrivadasPorReceta(usuario_id, receta_id);
       res.status(200).json(anotaciones);
     } catch (error) {
-      manejarErrorController(error, res, '[anotacion.controller] Error en listarPrivadasPorReceta');
+      console.error('[anotacion.controller] Error en listarPrivadasPorReceta:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
 
@@ -101,7 +107,8 @@ const anotacionController = {
       const anotaciones = await anotacionService.listarTodasPrivadas(usuario_id);
       res.status(200).json(anotaciones);
     } catch (error) {
-      manejarErrorController(error, res, '[anotacion.controller] Error en listarTodasPrivadas');
+      console.error('[anotacion.controller] Error en listarTodasPrivadas:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
 
@@ -125,7 +132,9 @@ const anotacionController = {
       await anotacionService.actualizarPrivada(id, usuario_id, datos);
       res.status(200).json({ mensaje: 'Anotación actualizada' });
     } catch (error) {
-      manejarErrorController(error, res, '[anotacion.controller] Error en actualizarPrivada');
+      if (error instanceof AnotacionNoEncontradaError) { res.status(404).json({ error: error.message }); return; }
+      console.error('[anotacion.controller] Error en actualizarPrivada:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
 
@@ -138,7 +147,9 @@ const anotacionController = {
       await anotacionService.eliminarPrivada(id, usuario_id);
       res.status(204).send();
     } catch (error) {
-      manejarErrorController(error, res, '[anotacion.controller] Error en eliminarPrivada');
+      if (error instanceof AnotacionNoEncontradaError) { res.status(404).json({ error: error.message }); return; }
+      console.error('[anotacion.controller] Error en eliminarPrivada:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
 
@@ -165,7 +176,10 @@ const anotacionController = {
       );
       res.status(201).json(anotacion);
     } catch (error) {
-      manejarErrorController(error, res, '[anotacion.controller] Error en crearEstilo');
+      if (error instanceof RecetaNoExisteError) { res.status(404).json({ error: error.message }); return; }
+      if (error instanceof NoAutorizadoError) { res.status(403).json({ error: error.message }); return; }
+      console.error('[anotacion.controller] Error en crearEstilo:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
 
@@ -177,7 +191,8 @@ const anotacionController = {
       const anotaciones = await anotacionService.listarEstiloPorReceta(receta_id);
       res.status(200).json(anotaciones);
     } catch (error) {
-      manejarErrorController(error, res, '[anotacion.controller] Error en listarEstiloPorReceta');
+      console.error('[anotacion.controller] Error en listarEstiloPorReceta:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
 
@@ -191,7 +206,10 @@ const anotacionController = {
       await anotacionService.eliminarEstilo(id, receta_id, usuario_id);
       res.status(204).send();
     } catch (error) {
-      manejarErrorController(error, res, '[anotacion.controller] Error en eliminarEstilo');
+      if (error instanceof RecetaNoExisteError) { res.status(404).json({ error: error.message }); return; }
+      if (error instanceof NoAutorizadoError) { res.status(403).json({ error: error.message }); return; }
+      console.error('[anotacion.controller] Error en eliminarEstilo:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
 };

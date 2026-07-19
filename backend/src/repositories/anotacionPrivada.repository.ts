@@ -5,6 +5,13 @@
  * Las anotaciones privadas son personales: solo las ve su propietario.
  * Todos los métodos reciben usuario_id para garantizar que un usuario
  * nunca accede a las anotaciones de otro.
+ *
+ * Métodos:
+ *   create               -- crear anotación sobre una receta (RF07)
+ *   findByUsuarioYReceta -- leer anotaciones propias de una receta (RF07)
+ *   findByUsuario        -- todas las anotaciones del usuario (RF07)
+ *   update               -- editar contenido o color (RF07)
+ *   delete               -- eliminar anotación propia (RF07)
  */
 
 import prisma from '../lib/prisma';

@@ -8,8 +8,7 @@
 
 import { Request, Response } from 'express';
 import { z } from 'zod';
-import historialService from '../services/historial.service';
-import { RecetaNoEncontradaError } from '../errors/RecetaNoEncontradaError';
+import historialService, { RecetaNoExisteParaHistorialError } from '../services/historial.service';
 
 // Esquema de validación
 
@@ -40,7 +39,7 @@ const historialController = {
       const entrada = await historialService.marcarCocinada(usuario_id, resultado.data.receta_id);
       res.status(201).json(entrada);
     } catch (error) {
-      if (error instanceof RecetaNoEncontradaError) {
+      if (error instanceof RecetaNoExisteParaHistorialError) {
         res.status(404).json({ error: error.message });
         return;
       }

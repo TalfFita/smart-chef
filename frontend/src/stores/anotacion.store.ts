@@ -2,50 +2,83 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import http from '@/api/http'
 import type { AnotacionPrivada, AnotacionEstilo } from '@/types'
-import { useAsyncState } from '@/composables/useAsyncState'
 
 export const useAnotacionStore = defineStore('anotacion', () => {
   // Estado
   const anotacionesPrivadas = ref<AnotacionPrivada[]>([])
   const anotacionesEstilo = ref<AnotacionEstilo[]>([])
-  const { cargando, error, runAsync } = useAsyncState()
+  const cargando = ref(false)
+  const error = ref<string | null>(null)
 
   async function cargarPrivadas(recetaId: number): Promise<void> {
-    anotacionesPrivadas.value = await runAsync(async () => {
+    cargando.value = true
+    error.value = null
+    try {
       const { data } = await http.get<AnotacionPrivada[]>(`/recetas/${recetaId}/anotaciones/privadas`)
-      return data
-    }, 'Error al cargar anotaciones privadas')
+      anotacionesPrivadas.value = data
+    } catch (e) {
+      error.value = 'Error al cargar anotaciones privadas'
+      throw e
+    } finally {
+      cargando.value = false
+    }
   }
 
   async function crearPrivada(recetaId: number, datos: Partial<AnotacionPrivada>): Promise<void> {
-    const data = await runAsync(async () => {
+    cargando.value = true
+    error.value = null
+    try {
       const { data } = await http.post<AnotacionPrivada>(`/recetas/${recetaId}/anotaciones/privadas`, datos)
-      return data
-    }, 'Error al crear anotación privada')
-    anotacionesPrivadas.value.push(data)
+      anotacionesPrivadas.value.push(data)
+    } catch (e) {
+      error.value = 'Error al crear anotación privada'
+      throw e
+    } finally {
+      cargando.value = false
+    }
   }
 
   async function actualizarPrivada(id: number, datos: Partial<AnotacionPrivada>): Promise<void> {
-    const data = await runAsync(async () => {
+    cargando.value = true
+    error.value = null
+    try {
       const { data } = await http.patch<AnotacionPrivada>(`/anotaciones/privadas/${id}`, datos)
-      return data
-    }, 'Error al actualizar anotación privada')
-    const idx = anotacionesPrivadas.value.findIndex((a) => a.id === id)
-    if (idx !== -1) anotacionesPrivadas.value[idx] = data
+      const idx = anotacionesPrivadas.value.findIndex((a) => a.id === id)
+      if (idx !== -1) anotacionesPrivadas.value[idx] = data
+    } catch (e) {
+      error.value = 'Error al actualizar anotación privada'
+      throw e
+    } finally {
+      cargando.value = false
+    }
   }
 
   async function eliminarPrivada(id: number): Promise<void> {
-    await runAsync(async () => {
+    cargando.value = true
+    error.value = null
+    try {
       await http.delete(`/anotaciones/privadas/${id}`)
-    }, 'Error al eliminar anotación privada')
-    anotacionesPrivadas.value = anotacionesPrivadas.value.filter((a) => a.id !== id)
+      anotacionesPrivadas.value = anotacionesPrivadas.value.filter((a) => a.id !== id)
+    } catch (e) {
+      error.value = 'Error al eliminar anotación privada'
+      throw e
+    } finally {
+      cargando.value = false
+    }
   }
 
   async function cargarEstilo(recetaId: number): Promise<void> {
-    anotacionesEstilo.value = await runAsync(async () => {
+    cargando.value = true
+    error.value = null
+    try {
       const { data } = await http.get<AnotacionEstilo[]>(`/recetas/${recetaId}/anotaciones/estilo`)
-      return data
-    }, 'Error al cargar anotaciones de estilo')
+      anotacionesEstilo.value = data
+    } catch (e) {
+      error.value = 'Error al cargar anotaciones de estilo'
+      throw e
+    } finally {
+      cargando.value = false
+    }
   }
 
   return {

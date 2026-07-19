@@ -17,7 +17,6 @@
 import anotacionPrivadaRepository from '../repositories/anotacionPrivada.repository';
 import anotacionEstiloRepository from '../repositories/anotacionEstilo.repository';
 import recetaRepository from '../repositories/receta.repository';
-import { RecetaNoEncontradaError } from '../errors/RecetaNoEncontradaError';
 
 // Errores de dominio
 
@@ -32,6 +31,13 @@ export class NoAutorizadoError extends Error {
   constructor() {
     super('No autorizado para realizar esta acción');
     this.name = 'NoAutorizadoError';
+  }
+}
+
+export class RecetaNoExisteError extends Error {
+  constructor() {
+    super('La receta no existe');
+    this.name = 'RecetaNoExisteError';
   }
 }
 
@@ -53,7 +59,7 @@ const anotacionService = {
     posicion_bloque?: number | null
   ) {
     const receta = await recetaRepository.findById(receta_id);
-    if (!receta) throw new RecetaNoEncontradaError('La receta no existe');
+    if (!receta) throw new RecetaNoExisteError();
 
     return anotacionPrivadaRepository.create({
       usuario_id, receta_id, contenido, color,
@@ -118,7 +124,7 @@ const anotacionService = {
   ) {
     // Verificar que la receta existe y que el usuario es el autor
     const receta = await recetaRepository.findById(receta_id);
-    if (!receta) throw new RecetaNoEncontradaError('La receta no existe');
+    if (!receta) throw new RecetaNoExisteError();
     if (receta.autor_id !== usuario_id) throw new NoAutorizadoError();
 
     return anotacionEstiloRepository.create({
@@ -145,7 +151,7 @@ const anotacionService = {
    */
   async eliminarEstilo(id: number, receta_id: number, usuario_id: number) {
     const receta = await recetaRepository.findById(receta_id);
-    if (!receta) throw new RecetaNoEncontradaError('La receta no existe');
+    if (!receta) throw new RecetaNoExisteError();
     if (receta.autor_id !== usuario_id) throw new NoAutorizadoError();
 
     return anotacionEstiloRepository.delete(id);

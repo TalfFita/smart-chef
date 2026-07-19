@@ -1,5 +1,5 @@
-// schema.prisma - Smart Chef
-// Modelo de datos definitivo con las 7 entidades y enums correctos
+// schema.prisma — Smart Chef
+// Modelo de datos definitivo con las 6 entidades y enums correctos
 
 generator client {
   provider = "prisma-client-js"
@@ -113,7 +113,7 @@ model AnotacionEstilo {
   explicacion   String   // conocimiento tácito explicado
   created_at    DateTime @default(now())
 
-  // Relaciones - PÚBLICA: cualquier usuario puede verla
+  // Relaciones — PÚBLICA: cualquier usuario puede verla
   // Cascade en ambas: si se borra la receta O el bloque, se borra la anotación
   receta Receta        @relation(fields: [receta_id], references: [id], onDelete: Cascade)
   bloque BloqueReceta? @relation(fields: [bloque_id], references: [id], onDelete: Cascade)
@@ -131,7 +131,7 @@ model AnotacionPrivada {
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
 
-  // Relaciones - PRIVADA: solo la ve su propietario
+  // Relaciones — PRIVADA: solo la ve su propietario
   usuario Usuario @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
   receta  Receta  @relation(fields: [receta_id], references: [id], onDelete: Cascade)
 

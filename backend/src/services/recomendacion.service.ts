@@ -26,7 +26,6 @@
 
 import recetaRepository from '../repositories/receta.repository';
 import { CategoriaMenu, EstiloCulinario, ModoPreparacion } from '@prisma/client';
-import { formatearTiempo } from '../utils/tiempo.utils';
 
 // Pesos del scoring (Fase 2)
 // Documentados como constantes explícitas para justificarlos en la defensa.
@@ -103,6 +102,27 @@ export interface AnotacionEstiloFormateada {
 }
 
 // Utilidades
+
+/**
+ * Formatea minutos a string legible.
+ * ≤ 90 min → "45 min"
+ * > 90 min → "1h 30min", "2h 05min", etc.
+ *
+ * Se aplica a tiempo_preparacion de la receta y tiempo_estimado de cada bloque.
+ */
+function formatearTiempo(minutos: number): string {
+  if (minutos <= 90) {
+    return `${minutos} min`;
+  }
+  const horas = Math.floor(minutos / 60);
+  const mins = minutos % 60;
+  if (mins === 0) {
+    return `${horas}h`;
+  }
+  // Padding de 2 dígitos en los minutos para consistencia (ej: "2h 05min")
+  const minsStr = mins.toString().padStart(2, '0');
+  return `${horas}h ${minsStr}min`;
+}
 
 /**
  * Calcula la puntuación de una receta en Fase 2.

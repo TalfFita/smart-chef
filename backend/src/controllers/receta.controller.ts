@@ -13,10 +13,9 @@
 
 import { Request, Response } from 'express';
 import { z } from 'zod';
-import recetaService from '../services/receta.service';
+import recetaService, { RecetaNoEncontradaError, RecetaNoAutorizadaError } from '../services/receta.service';
 import recomendacionService from '../services/recomendacion.service';
 import { CategoriaMenu, EstiloCulinario, ModoPreparacion, Dificultad, TipoBloque } from '@prisma/client';
-import { manejarErrorController } from '../utils/manejarErrorController';
 
 // Esquema de validación para crear receta
 
@@ -64,7 +63,8 @@ const recetaController = {
       const recetas = await recetaService.obtenerTodas();
       res.status(200).json(recetas);
     } catch (error) {
-      manejarErrorController(error, res, '[receta.controller] Error en listar');
+      console.error('[receta.controller] Error en listar:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
 
@@ -88,7 +88,8 @@ const recetaController = {
       const recetas = await recetaService.getTrending(limit);
       res.status(200).json(recetas);
     } catch (error) {
-      manejarErrorController(error, res, '[receta.controller] Error en getTrending');
+      console.error('[receta.controller] Error en getTrending:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
 
@@ -108,7 +109,12 @@ const recetaController = {
       const receta = await recetaService.obtenerPorId(id);
       res.status(200).json(receta);
     } catch (error) {
-      manejarErrorController(error, res, '[receta.controller] Error en obtenerPorId');
+      if (error instanceof RecetaNoEncontradaError) {
+        res.status(404).json({ error: error.message });
+        return;
+      }
+      console.error('[receta.controller] Error en obtenerPorId:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
 
@@ -140,7 +146,8 @@ const recetaController = {
       const receta = await recetaService.crear(input, autor_id);
       res.status(201).json(receta);
     } catch (error) {
-      manejarErrorController(error, res, '[receta.controller] Error en crear');
+      console.error('[receta.controller] Error en crear:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
   /**
@@ -177,7 +184,16 @@ const recetaController = {
       const receta = await recetaService.actualizar(id, input, autor_id);
       res.status(200).json(receta);
     } catch (error) {
-      manejarErrorController(error, res, '[receta.controller] Error en actualizar');
+      if (error instanceof RecetaNoEncontradaError) {
+        res.status(404).json({ error: error.message });
+        return;
+      }
+      if (error instanceof RecetaNoAutorizadaError) {
+        res.status(403).json({ error: error.message });
+        return;
+      }
+      console.error('[receta.controller] Error en actualizar:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
 
@@ -199,7 +215,16 @@ const recetaController = {
       const resultado = await recetaService.eliminar(id, autor_id);
       res.status(200).json(resultado);
     } catch (error) {
-      manejarErrorController(error, res, '[receta.controller] Error en eliminar');
+      if (error instanceof RecetaNoEncontradaError) {
+        res.status(404).json({ error: error.message });
+        return;
+      }
+      if (error instanceof RecetaNoAutorizadaError) {
+        res.status(403).json({ error: error.message });
+        return;
+      }
+      console.error('[receta.controller] Error en eliminar:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
 };

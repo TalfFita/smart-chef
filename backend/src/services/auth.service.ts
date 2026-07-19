@@ -20,7 +20,7 @@ import usuarioRepository from '../repositories/usuario.repository';
 
 const SALT_ROUNDS = 10;
 const JWT_SECRET = process.env.JWT_SECRET ?? 'secreto_desarrollo_inseguro';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN ?? '7d';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN ?? '15m';
 
 // Tipos
 
@@ -154,7 +154,7 @@ const authService = {
  */
 function emitirToken(payload: JwtPayload): string {
   return jwt.sign(payload, JWT_SECRET, {
-    expiresIn: JWT_EXPIRES_IN as Exclude<jwt.SignOptions['expiresIn'], undefined>,
+    expiresIn: JWT_EXPIRES_IN as unknown as Exclude<jwt.SignOptions['expiresIn'], undefined>,
   });
 }
 

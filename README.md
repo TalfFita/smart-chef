@@ -1,6 +1,6 @@
 # Smart Chef
 
-Aplicación web de recomendación culinaria basada en reglas y metadatos.
+Aplicación web de recomendación culinaria basada en reglas y metadatos.  
 Trabajo de Fin de Grado — Ingeniería Informática · Universidad Internacional de La Rioja (UNIR).
 
 ---
@@ -18,14 +18,14 @@ Trabajo de Fin de Grado — Ingeniería Informática · Universidad Internaciona
 
 ## Requisitos previos
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop) instalado y en ejecución (para base de datos y backend)
-- Node.js 20+ y npm instalados (para el servidor de desarrollo del frontend)
+- Tener instalado y corriendo [Docker Desktop](https://www.docker.com/products/docker-desktop) (para base de datos y backend)
+- Tener instalado Node.js 20+ y npm (para el servidor de desarrollo del frontend)
 
 ---
 
-## Primera vez que se usa
+## Puesta en marcha
 
-Solo hace falta hacer esto una vez, al clonar el repositorio:
+### Primera vez
 
 ```bash
 git clone <url-del-repositorio>
@@ -33,23 +33,17 @@ cd smart-chef
 docker-compose build backend
 ```
 
-La primera vez que se arranque (siguiente sección), el propio backend se encarga de crear la base de datos, aplicar las migraciones y cargar el catálogo de 80 recetas de demostración — no hace falta ningún paso manual adicional.
-
----
-
-## Arranque normal (cada vez que se trabaja en el proyecto)
+### Arrancar para desarrollar
 
 **Terminal 1 — Base de datos y API:**
-
 ```bash
 docker-compose up db backend
 ```
 
 **Terminal 2 — Frontend:**
-
 ```bash
 cd frontend
-npm install   # solo si es la primera vez, o si cambió package.json
+npm install   # solo la primera vez
 npm run dev
 ```
 
@@ -61,9 +55,9 @@ npm run dev
 | API REST | http://localhost:3000/api |
 | Health check | http://localhost:3000/api/health |
 
-### Credenciales de demostración
+> **Desde otro dispositivo (móvil, tablet, otro ordenador) conectado a la misma red WiFi:** abre `http://<IP-DEL-PC>:5173`. La IP la muestra el propio Vite al arrancar el frontend (es la que empieza por `192.168.`).
 
-Estas cuentas existen únicamente para facilitar la evaluación del proyecto; no representan una configuración de seguridad real.
+### Credenciales de demostración
 
 | Email | Contraseña | Rol |
 |-------|------------|-----|
@@ -72,33 +66,48 @@ Estas cuentas existen únicamente para facilitar la evaluación del proyecto; no
 
 ---
 
-## Detener y volver a arrancar
+## Variables de entorno
 
-Para una pausa normal (los datos se conservan):
+Ninguna variable es obligatoria para arrancar: todas tienen un valor por
+defecto, ya sea en el propio `.env.example` o en `docker-compose.yml`.
 
-```bash
-docker-compose down
-```
+**`backend/.env.example`:**
 
-El siguiente `docker-compose up db backend` arranca de nuevo con todo tal como estaba.
+| Variable | Por defecto | Uso |
+|----------|-------------|-----|
+| `DATABASE_URL` | `postgresql://smart_chef_user:smart_chef_pass@localhost:5432/smart_chef_db` | Conexión Prisma a PostgreSQL |
+| `JWT_SECRET` | `cambia_este_secreto_por_uno_seguro_en_produccion` | Firma de los tokens JWT |
+| `JWT_EXPIRES_IN` | `15m` | Duración del token de acceso |
+| `PORT` | `3000` | Puerto del servidor Express |
+| `NODE_ENV` | `development` | Entorno de ejecución |
+| `CORS_ORIGIN` | `http://localhost:5173` | Whitelist de orígenes CORS (admite lista separada por comas) |
 
-Para borrar también la base de datos y empezar desde cero (equivalente a una "primera vez" otra vez, sin necesidad de reconstruir la imagen):
+**`frontend/.env.example`:**
 
-```bash
-docker-compose down -v
-```
+| Variable | Por defecto | Uso |
+|----------|-------------|-----|
+| `VITE_API_URL` | vacío | URL base de la API. Vacío = peticiones relativas a `/api` vía proxy de Vite. No hace falta tocarla para el uso normal en localhost. |
+
+**Nota de seguridad:** `JWT_SECRET` tiene un valor por defecto que está publicado en este repositorio. Si vas a usar esta app fuera de tu demo local (cualquier despliegue accesible por terceros), cámbialo por un secreto propio.
 
 ---
 
 ## Cuándo reconstruir el contenedor del backend
 
-Solo hace falta si cambia `backend/package.json` o `backend/Dockerfile` (por ejemplo, tras añadir una dependencia nueva):
+Solo es necesario reconstruir cuando cambien `backend/package.json` o `backend/Dockerfile`:
 
 ```bash
 docker-compose build backend
 ```
 
-En el resto de casos, `docker-compose up db backend` es suficiente.
+---
+
+## Detener los servicios
+
+```bash
+docker-compose down          # detiene y conserva los datos
+docker-compose down -v       # detiene y borra la base de datos
+```
 
 ---
 

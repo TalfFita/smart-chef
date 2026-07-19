@@ -1,16 +1,26 @@
 /**
  * receta.service.ts -- Lógica de negocio de recetas
  *
- * No accede a Prisma directamente: usa recetaRepository.
+ * Responsabilidades:
+ *   - Obtener catálogo completo (RF03)
+ *   - Obtener detalle de una receta (RF03)
+ *   - Crear receta con bloques (RF09)
+ *
+ * No accede a Prisma directamente: usa recetaRepository y bloqueRepository.
  * No gestiona HTTP: eso lo hace receta.controller.ts.
  */
 
 import recetaRepository, { RecetaCreateInput, RecetaUpdateInput } from '../repositories/receta.repository';
 import { CategoriaMenu, EstiloCulinario, ModoPreparacion, Dificultad, TipoBloque } from '@prisma/client';
-import { formatearTiempo } from '../utils/tiempo.utils';
-import { RecetaNoEncontradaError } from '../errors/RecetaNoEncontradaError';
 
 // Errores de dominio
+
+export class RecetaNoEncontradaError extends Error {
+  constructor(id: number) {
+    super(`Receta con id ${id} no encontrada`);
+    this.name = 'RecetaNoEncontradaError';
+  }
+}
 
 export class RecetaNoAutorizadaError extends Error {
   constructor(id: number) {
@@ -40,6 +50,21 @@ export interface CrearRecetaInput {
   bloques: BloqueInput[];
 }
 
+// Utilidad: formatear tiempo
+
+/**
+ * Convierte minutos a string legible.
+ * ≤ 90 min → "45 min"
+ * > 90 min → "1h 30min"
+ */
+export function formatearTiempo(minutos: number): string {
+  if (minutos <= 90) return `${minutos} min`;
+  const horas = Math.floor(minutos / 60);
+  const mins = minutos % 60;
+  if (mins === 0) return `${horas}h`;
+  return `${horas}h ${mins.toString().padStart(2, '0')}min`;
+}
+
 // Servicio
 
 const recetaService = {
@@ -64,7 +89,7 @@ const recetaService = {
    */
   async obtenerPorId(id: number) {
     const receta = await recetaRepository.findById(id);
-    if (!receta) throw new RecetaNoEncontradaError(`Receta con id ${id} no encontrada`);
+    if (!receta) throw new RecetaNoEncontradaError(id);
     if (receta.eliminado_en) {
       return { id: receta.id, titulo: receta.titulo, eliminada: true };
     }
@@ -117,7 +142,7 @@ const recetaService = {
    */
   async actualizar(id: number, datos: CrearRecetaInput, autor_id: number) {
     const receta = await recetaRepository.findById(id);
-    if (!receta) throw new RecetaNoEncontradaError(`Receta con id ${id} no encontrada`);
+    if (!receta) throw new RecetaNoEncontradaError(id);
     if (receta.autor_id !== autor_id) throw new RecetaNoAutorizadaError(id);
 
     const input: RecetaUpdateInput = {
@@ -141,10 +166,8 @@ const recetaService = {
    */
   async eliminar(id: number, autor_id: number) {
     const receta = await recetaRepository.findById(id);
-    if (!receta) throw new RecetaNoEncontradaError(`Receta con id ${id} no encontrada`);
-    // Guard de idempotencia: un 2º DELETE sobre una receta ya borrada
-    // responde igual que si el ID no existiera.
-    if (receta.eliminado_en) throw new RecetaNoEncontradaError(`Receta con id ${id} no encontrada`);
+    if (!receta) throw new RecetaNoEncontradaError(id);
+    if (receta.eliminado_en) throw new RecetaNoEncontradaError(id);
     if (receta.autor_id !== autor_id) throw new RecetaNoAutorizadaError(id);
 
     await recetaRepository.softDelete(id);

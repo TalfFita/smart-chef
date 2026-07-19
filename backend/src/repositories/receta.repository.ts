@@ -5,16 +5,13 @@
  * No contiene lógica de negocio: solo operaciones de consulta y escritura.
  *
  * Métodos:
- *   findAll                -- catálogo completo (RF03)
- *   findById               -- detalle con bloques y anotaciones (RF03)
- *   findByCriteria         -- filtrado por restricciones para el motor (RF04, RF05)
- *   findByQuery            -- búsqueda por texto para el buscador (RF11)
- *   findTrending           -- recetas ordenadas por nº de favoritos
- *   findByAutor            -- recetas creadas por un usuario (colección "Mis recetas")
- *   update                 -- editar receta reemplazando sus bloques (RF09)
- *   findByUsuarioConNotas  -- recetas con anotaciones privadas del usuario (colección "Con mis notas")
- *   create                 -- crear receta con bloques anidados (RF09)
- *   softDelete             -- borrado lógico (eliminado_en = ahora)
+ *   findAll          -- catálogo completo (RF03)
+ *   findById         -- detalle con bloques y anotaciones (RF03)
+ *   findByCriteria   -- filtrado por restricciones para el motor (RF04, RF05)
+ *   findByQuery      -- búsqueda por texto para el buscador (RF11)
+ *   findTrending     -- recetas ordenadas por nº de favoritos
+ *   create           -- crear receta con bloques anidados (RF09)
+ *   softDelete       -- borrado lógico (eliminado_en = ahora)
  */
 
 import prisma from '../lib/prisma';
@@ -22,8 +19,6 @@ import {
   CategoriaMenu,
   EstiloCulinario,
   ModoPreparacion,
-  Dificultad,
-  TipoBloque,
   Prisma,
 } from '@prisma/client';
 
@@ -44,7 +39,7 @@ export interface CriteriosRecomendacion {
  * Datos necesarios para crear un bloque al crear una receta.
  */
 export interface BloqueCreateInput {
-  tipo_bloque: TipoBloque;
+  tipo_bloque: string;
   orden: number;
   contenido: string;
   tiempo_estimado?: number | null;
@@ -58,7 +53,7 @@ export interface RecetaCreateInput {
   categoria_menu: CategoriaMenu;
   estilo_culinario: EstiloCulinario;
   modo_preparacion: ModoPreparacion;
-  dificultad: Dificultad;
+  dificultad: string;
   tiempo_preparacion: number;
   ingredientes_texto: string;
   tags: string[];
@@ -75,7 +70,7 @@ export interface RecetaUpdateInput {
   categoria_menu: CategoriaMenu;
   estilo_culinario: EstiloCulinario;
   modo_preparacion: ModoPreparacion;
-  dificultad: Dificultad;
+  dificultad: string;
   tiempo_preparacion: number;
   ingredientes_texto: string;
   tags: string[];
@@ -262,14 +257,14 @@ const recetaRepository = {
         categoria_menu:      datos.categoria_menu,
         estilo_culinario:    datos.estilo_culinario,
         modo_preparacion:    datos.modo_preparacion,
-        dificultad:          datos.dificultad,
+        dificultad:          datos.dificultad as any,
         tiempo_preparacion:  datos.tiempo_preparacion,
         ingredientes_texto:  datos.ingredientes_texto,
         tags:                datos.tags,
         bloques: {
           deleteMany: {},
           create: datos.bloques.map((b) => ({
-            tipo_bloque:     b.tipo_bloque,
+            tipo_bloque:     b.tipo_bloque as any,
             orden:           b.orden,
             contenido:       b.contenido,
             tiempo_estimado: b.tiempo_estimado ?? null,
@@ -309,14 +304,14 @@ const recetaRepository = {
         categoria_menu: datos.categoria_menu,
         estilo_culinario: datos.estilo_culinario,
         modo_preparacion: datos.modo_preparacion,
-        dificultad: datos.dificultad,
+        dificultad: datos.dificultad as any,
         tiempo_preparacion: datos.tiempo_preparacion,
         ingredientes_texto: datos.ingredientes_texto,
         tags: datos.tags,
         autor_id: datos.autor_id,
         bloques: {
           create: datos.bloques.map((b) => ({
-            tipo_bloque: b.tipo_bloque,
+            tipo_bloque: b.tipo_bloque as any,
             orden: b.orden,
             contenido: b.contenido,
             tiempo_estimado: b.tiempo_estimado ?? null,

@@ -68,6 +68,9 @@
         
              <!--PASO 2 - CONSTRUCTOR DE BLOQUES-->
         <template v-else-if="pasoActual === Paso.BLOQUES">
+          <section class="receta-header">
+
+          </section>
           <div class="bloques-contenedor">
 
             <!-- Indicador modo edición -->
@@ -384,7 +387,6 @@ import { useRecetaStore } from '@/stores/receta.store'
 import { useDragBloques }  from '@/composables/useDragBloques'
 import { useDobleToque }  from '@/composables/useDobleToque'
 import { mostrarToast }   from '@/composables/useToast'
-import { useAsyncAction } from '@/composables/useAsyncAction'
 import type { BloqueEnConstruccion, TipoBloque } from '@/types'
 import BloqueConstructor      from '@/components/BloqueConstructor.vue'
 import BottomSheet            from '@/components/BottomSheet.vue'
@@ -394,7 +396,6 @@ import { formatearTag }       from '@/utils/estiloUtils'
 const router      = useRouter()
 const route       = useRoute()
 const recetaStore = useRecetaStore()
-const { ejecutar } = useAsyncAction()
 
 // Modo edición (?editar=:id)
 const modoEdicion = computed(() => !!route.query['editar'])
@@ -723,20 +724,18 @@ async function guardarReceta(): Promise<void> {
   }
 
   try {
-    await ejecutar(
-      () => modoEdicion.value && idEdicion.value
-        ? recetaStore.actualizarReceta(idEdicion.value, payload)
-        : recetaStore.crearRecetaCompleta(payload),
-      {
-        mensajeExito: modoEdicion.value ? 'Receta actualizada correctamente' : 'Receta creada correctamente',
-        onExito: (receta) => router.push(`/recetas/${receta.id}?from=recetario`),
-        mensajeError: () => {
-          const base = recetaStore.error
-            ?? (modoEdicion.value ? 'Error al actualizar la receta' : 'Error al crear la receta')
-          return `${base}. Inténtalo de nuevo.`
-        },
-      }
+    const receta = modoEdicion.value && idEdicion.value
+      ? await recetaStore.actualizarReceta(idEdicion.value, payload)
+      : await recetaStore.crearRecetaCompleta(payload)
+    mostrarToast(
+      modoEdicion.value ? 'Receta actualizada correctamente' : 'Receta creada correctamente',
+      'success',
     )
+    router.push(`/recetas/${receta.id}?from=recetario`)
+  } catch {
+    const base = recetaStore.error
+      ?? (modoEdicion.value ? 'Error al actualizar la receta' : 'Error al crear la receta')
+    mostrarToast(`${base}. Inténtalo de nuevo.`, 'error')
   } finally {
     guardando.value = false
   }
@@ -1104,6 +1103,12 @@ onMounted(async () => {
 }
 
 .meta-label-req { color: var(--color-error); font-weight: 700; }
+.meta-label-opt {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--color-texto-terciario);
+}
 
 /* Carruseles ------------------------------------------------------------------- */
 .chips-row {
