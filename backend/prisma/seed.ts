@@ -19,7 +19,7 @@ const SALT_ROUNDS = 10;
 // MAIN
 
 async function main(): Promise<void> {
-  console.log('🌱 Iniciando seed...');
+  console.log('Iniciando seed...');
 
   // TRUNCATE con RESTART IDENTITY resetea las secuencias SERIAL,
   // garantizando que los usuarios siempre reciben id 1 y 2 tras el seed.
@@ -30,7 +30,7 @@ async function main(): Promise<void> {
      RESTART IDENTITY CASCADE`
   );
 
-  console.log('🗑️  Tablas limpiadas y secuencias reiniciadas');
+  console.log('Tablas limpiadas y secuencias reiniciadas');
 
   // USUARIOS
 
@@ -44,7 +44,7 @@ async function main(): Promise<void> {
     ],
   });
 
-  console.log('👤 Usuarios creados');
+  console.log('Usuarios creados');
 
   // RECETAS
   // Cada receta se crea con sus bloques anidados via create (no createMany)
@@ -791,7 +791,7 @@ async function main(): Promise<void> {
     ],
   });
 
-  console.log('✅ 40 recetas base creadas');
+  console.log('40 recetas base creadas');
 
   // RECETAS 41-80
   // Segunda vuelta: 2 recetas por combinación (variante B)
@@ -879,7 +879,7 @@ async function main(): Promise<void> {
 
   await crearReceta({ titulo: 'Pintxo de foie y manzana caramelizada sobre pan vasco', categoria_menu: CategoriaMenu.APERITIVO, estilo_culinario: EstiloCulinario.FUSION, modo_preparacion: ModoPreparacion.PROFESIONAL, dificultad: Dificultad.MEDIA, tiempo_preparacion: 20, ingredientes_texto: '4 rebanadas de pan de pueblo o txapela, 200 g de foie fresco de pato, 2 manzanas golden, 2 cucharadas de mantequilla, 2 cucharadas de azúcar moreno, 30 ml de calvados, sal en escamas, pimienta negra, brotes tiernos', tags: ['plancha', 'caramelizado', 'flameado', 'vasco_francés', 'foie', 'pintxo'], bloques: [{ tipo: TipoBloque.COCINAR, orden: 1, contenido: 'Pela y corta las manzanas en láminas. Carameliza con la mantequilla y el azúcar moreno en sartén a fuego medio hasta que estén doradas. Flamea con el calvados con cuidado.', tiempo_estimado: 10 }, { tipo: TipoBloque.COCINAR, orden: 2, contenido: 'Corta el foie en medallones de 1,5 cm. Sartén muy caliente sin grasa. Sella 20 segundos por cara. El foie se funde: trabaja rápido. Sal en escamas y pimienta al sacar.', tiempo_estimado: 5 }, { tipo: TipoBloque.FIN, orden: 3, contenido: 'Monta el pintxo: pan tostado, manzana caramelizada, medallón de foie. Termina con brotes tiernos. El foie cae de temperatura rápido: lleva al comensal sin esperar.', tiempo_estimado: null }] });
 
-  console.log('✅ 80 recetas creadas');
+  console.log('80 recetas creadas');
 
   // ANOTACIONES DE ESTILO
   // 20 anotaciones sobre términos culinarios reales.
@@ -917,8 +917,8 @@ async function main(): Promise<void> {
     });
   }
 
-  console.log('✅ 20 anotaciones de estilo creadas');
-  console.log('🎉 Seed completado: 2 usuarios, 80 recetas, 20 anotaciones de estilo');
+  console.log('20 anotaciones de estilo creadas');
+  console.log('Seed completado: 2 usuarios, 80 recetas, 20 anotaciones de estilo');
 }
 
 // FUNCION AUXILIAR
@@ -974,7 +974,7 @@ async function crearReceta(input: RecetaInput): Promise<void> {
 
 main()
   .catch((e) => {
-    console.error('❌ Error en el seed:', e);
+    console.error('Error en el seed:', e);
     process.exit(1);
   })
   .finally(async () => {
